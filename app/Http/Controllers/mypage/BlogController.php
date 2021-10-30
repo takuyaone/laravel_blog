@@ -14,9 +14,9 @@ class BlogController extends Controller
     {
         // $blogs=Blog::where('user_id',Auth::user()->id)->get();
         // $blogs = Blog::where('user_id', Auth::id())->get();
-        $blogs=$request->user()->blogs;
+        $blogs = $request->user()->blogs;
 
-        return view('mypage.index',compact('blogs'));
+        return view('mypage.index', compact('blogs'));
     }
 
     public function create()
@@ -26,37 +26,20 @@ class BlogController extends Controller
 
     public function store(BlogSaveRequest $request)
     {
-        $data=$request->validated();
+        $data = $request->proceed();
 
-        // $data=$request->validate([
-        //     'title'=>['required','string','max:25'],
-        //     'body'=>['required','string'],
-        //     'is_open'=>['nullable']
-        // ]);
+        $blog = $request->user()->blogs()->create($data);
 
-        // $data['is_open']=$request->boolean('is_open');
-        $data['pict']=$request->file('pict')->store('blogs','public');
-
-        dd($data);
-
-        $blog=$request->user()->blogs()->create($data);
-
-        return redirect(route('mypage.blog.edit',$blog))->with('message','新規登録しました。');
-
+        return redirect(route('mypage.blog.edit', $blog))->with('message', '新規登録しました。');
     }
 
     public function edit(Blog $blog, Request $request)
     {
-        //自分のブログに限定する
-        // if($request->user()->isNot($blog->user)){
-        //     abort(403);
-        // }
+        abort_if($request->user()->isNot($blog->user), 403);
 
-        abort_if($request->user()->isNot($blog->user),403);
+        $data = old() ?: $blog;
 
-        $data=old() ?: $blog;
-
-        return view('mypage.blog.edit',compact('data'));
+        return view('mypage.blog.edit', compact('data', 'blog'));
     }
 
     public function update(Blog $blog, BlogSaveRequest $request)
@@ -64,9 +47,9 @@ class BlogController extends Controller
 
         abort_if($request->user()->isNot($blog->user), 403);
 
-        $data = $request->validated();
+        $data = $request->proceed();
 
-        // $data['is_open'] = $request->boolean('is_open');
+        $data['is_open'] = $request->boolean('is_open');
 
         $blog->update($data);
         return redirect(route('mypage.blog.edit', $blog))->with('message', 'ブログを更新しました。');
@@ -76,12 +59,11 @@ class BlogController extends Controller
     {
         abort_if($request->user()->isNot($blog->user), 403);
 
-        //付属するコメントは、イベントを使って削除しています。
+        //画像と付属するコメントは、イベントを使って削除しています。
         //App\Models\Blog参照
 
         $blog->delete();
 
         return redirect('mypage');
     }
-
 }

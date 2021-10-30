@@ -39,4 +39,16 @@ class BlogSaveRequest extends FormRequest
             'is_open' => $this->boolean('is_open'),
         ]);
     }
+
+    public function proceed()
+    {
+        $data=$this->validated();
+
+        if ($this->hasFile('pict')) {
+            //画像の削除はイベントを使って削除
+            $data['pict'] = $this->file('pict')->store('blogs', 'public');
+        }
+
+        return $data;
+    }
 }

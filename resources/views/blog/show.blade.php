@@ -6,6 +6,10 @@
 <div>{!! nl2br(e($blog->body)) !!}</div>
 
 {{-- 画像挿入箇所 --}}
+@if($blog->pict)
+<p><img src="{{Storage::url($blog->pict)}}" alt="" width="200"></p>
+@endif
+
 
 <p>書き手:{{$blog->user->name}}</p>
 

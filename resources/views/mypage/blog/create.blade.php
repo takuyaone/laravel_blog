@@ -4,7 +4,7 @@
 
 <h1>ブログ新規投稿</h1>
 
-<form method="post" action="">
+<form method="post" action="" enctype="multipart/form-data">
 @csrf
 
 @include('inc.error')
